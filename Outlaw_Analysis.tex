@@ -18,7 +18,9 @@
 \newcommand{\x}{\vec{x}}
 \renewcommand{\arraystretch}{1.3}
 
-\newtheorem{defcon}{Definition}
+\theoremstyle{definition}
+\newtheorem{defn}{Definition}
+\theoremstyle{plain}
 \newtheorem{thm}{Theorem}
 
 \begin{document}
@@ -44,15 +46,16 @@
 
 	One of the most valuable tools for modeling in the Bayesian's belt is the Markov chain. 
 
-	\begin{defcon}For some finite state space $I$, we define a discrete-time Markov chain with initial distribution $\lambda$ and transition matrix $\T$ as a  sequence of random variables $(X_n)_{1\leq n \leq N}$ such that, for $0 \leq n \leq N$ and $i_0, \dots, i_{n+1} \in I$,
-\begin{enumerate}[(i)]
-\item $\lambda_{i_0} = \Pr[X_0 = i_0]$  
-\item $\T_{i_n, i_{n+1}} = \Pr[X_{n+1} = i_{n+1} ~|~ {X_0 = i_0}, \dots, X_{n}=i_n]$
+\begin{defn}
+For some finite state space $I$, we define a discrete-time Markov chain with initial distribution $\lambda$ and transition matrix $\T$ as a  sequence of random variables $(X_n)_{n \geq 0}$ such that, for $n \geq 0$ and $i_0, \dots, i_{n+1} \in I$,
+	\begin{enumerate}[(i)]
+	\item $\lambda_{i_0} = \Pr[X_0 = i_0]$  
+	\item $\T_{i_n, i_{n+1}} = \Pr[X_{n+1} = i_{n+1} ~|~ {X_0 = i_0}, \dots, X_{n}=i_n]$
 
-\hspace{3.9em}$ = \Pr[X_{n+1} = i_{n+1} ~|~ X_{n} = i_n]$
-\end{enumerate}
-	\end{defcon}
-We can represent $(X_n)_{0 \leq n \leq N}$ with the convenient notation $Markov(\lambda, \T)$. Equivalent to (ii), the probability of transitioning to state $j$ from state $i$ is given by $\T_{i, j}$ and is independent of all previous states; this is known as memorylessness or the Markov property. Also, note that $\T$ is a right stochastic matrix, meaning that for $i \in I$, \[\sum_{j=0}^{N} \T_{i, j} = 1;\] that is, the probabilities in each row of $\T$ sum to 1. Finally, note that we represent the distribution $\lambda$ as a stochastic vector.
+	\hspace{3.7em}$ = \Pr[X_{n+1} = i_{n+1} ~|~ X_{n} = i_n]$
+	\end{enumerate}
+\end{defn}
+We can represent $(X_n)_{n \geq 0}$ with the convenient notation $Markov(\lambda, \T)$. Equivalent to (ii), the probability of transitioning to state $j$ from state $i$ is given by $\T_{i, j}$ and is independent of all previous states; this is known as memorylessness or the Markov property. Also, note that $\T$ is a right stochastic matrix, meaning that for any $i \in I$, \[\sum_{j\in I} \T_{i, j} = 1;\] that is, the probabilities in each row of $\T$ sum to 1. Finally, note that we represent the distribution $\lambda$ as a stochastic vector.
 \\
 	
 	An absorbing Markov chain is simply a Markov chain for which there exists a state $i \in I$ such that $\T_{i,i} = 1$. Equivalently, an absorbing Markov chain contains at least one state from which transition to another state is impossible. Absorbing Markov chains are especially useful for modeling games, as winning a game is typically an absorbing state.
@@ -71,38 +74,47 @@ We can represent $(X_n)_{0 \leq n \leq N}$ with the convenient notation $Markov(
      \end{tikzpicture}
 	\]
 	
-	Since the probability of transitioning between states only depends on the current state, this game is an ideal candidate for a Markov chain with state space $I = \{a, b, c\}$. Since the player begins at state $a$, then we can represent this game as a Markov-chain $Markov(\lambda, \T)$ such that
+	Since the probability of transitioning between states only depends on the current state, this game is an ideal candidate for a Markov chain with state space $I = \{a, b, c\}$. Since the player begins at state $a$ with probability 1, then we can represent this game as a Markov-chain $Markov(\lambda, \T)$ such that
 	\[\lambda = \kbordermatrix{ ~ &a &b &c \cr
 		& 1 & 0 & 0},\]
 	\[\T = \kbordermatrix{~ &a & b & c \cr
 		a&\frac{2}{6} &  \frac{4}{6}  & 0 \cr
 		b& \frac{2}{6}  &  \frac{3}{6} & \frac{1}{6} \cr
 		c& 0 & 0 & 1}\]
-	At this point, it is very simple to determine the probability that the player is at any state in $i \in I$ after some number of turns. We define $\Pr_{(n)}[i]$ to refer to the probably of being in state $i$ after $n$ turns. 
+	At this point, it is very simple to determine the probability that the player is at any state in $i \in I$ after $n$ turns, for some $n \in \mathbb{N}$.
 \\
 \begin{thm}
-$\Pr_{(n)}[i] = (\lambda \T^{\,n})_i$, for $n \in \mathbb{N}$\\
+If $(X_n)_{n \geq 0}$ is $Markov(\lambda, \T)$, then for all $n \geq 0$, $i_0, \dots, i_n \in I$, \[\Pr[X_0 = i_0, X_1 = i_1, \dots, X_n = i_n] = \lambda_{i_0}\T_{i_0, i_1}\T_{i_1,i_2}, \dots, \T_{i_{n-1}, i_n}\]
 \end{thm}
-\textit{Proof}: by induction on $n$.
-\\
 
-Base case: $\Pr_{(0)}[i] = (\lambda \T^0)_i = \lambda_i$ by definition.
-
-Induction step: Assume that for some $k \in \mathbb{N}$, $\Pr_{(k)}[i] = (\lambda \T^k)_i$.
-\noindent
+\begin{proof} Since $(X_n)_{n \geq 0}$ is $Markov(\lambda, \T)$, then
 \begin{align*}
-\textstyle {\Pr_{(k+1)}\ [i]} &= \sum_{j \in I} \textstyle (\Pr_{(k)}[j] \times \T_{j, i})\\
-&= \sum_{j \in I}((\lambda \T^k)_j \times \T_{j, i}) \tag{by IH}\\
-&= \lambda (\T^{k+1})_i
+\Pr[&X_0 = i_0, X_1 = i_1, \dots, X_n = i_n]\\
+ &= \Pr[X_0 = i_0]\Pr[X_1 = i_1 | X_0 = i_0]\dots\Pr[X_n = i_n | X_0 = i_0, \dots X_{n-1} = i_{n-1}]\\
+ &= \lambda_{i_0}\T_{i_0, i_1}\T_{i_1,i_2}, \dots, \T_{i_{n-1}, i_n}
 \end{align*}
-Therefore $\Pr_{(n)}[i] = (\lambda \T^n)_i$ for all $n \in \mathbb{N}$. \qed
-\\
+\end{proof}
+It can be shown that the converse of this statement holds as well.
+
+\begin{thm} If $(X_n)_{n \geq 0}$ is $Markov(\lambda, \T)$, then for any $n \geq 0$, $i \in I$,
+\[\Pr[X_n = i] = (\lambda \T^{\,n})_i\]
+\end{thm}
+
+\begin{proof}
+The probability $\Pr[X_n = i]$ that we are on state $i$ after $n$ steps is equal to the sum of the probabilities of each permutation of states from steps $0$ through $n-1$. Therefore,
+\begin{align*}
+\Pr[X_n = i] &= \sum_{i_0 \in I} \dots \sum_{i_{n-1} \in I} \Pr[X_0 = i_0, \dots, X_{n-1} = i_{n-1}, X_n = i]\\
+&= \sum_{i_0 \in I} \dots \sum_{i_{n-1} \in I} \lambda_{i_0}\T_{i_0, i_1}\dots\T_{i_{n-1}, i} \tag{by Theorem 1}\\
+&= (\lambda \T^n)_i
+\end{align*}
+\end{proof}
 
 	Returning to our game, we can use this identity to determine the probability of being at each state after ten turns.
-	\[{\Pr}_{(10)} = 
+	\begin{align*}
+	\Big[\Pr[X_{10} = i] ~|~ i \in I\Big] &= 
 	\begin{bmatrix}
-	{\Pr}_{a}(20) & {\Pr}_{b}(10) & {\Pr}_{c}(10)
-	\end{bmatrix} =
+	\Pr[X_{10} = a] & \Pr[X_{10} = b] & \Pr[X_{10} = c]
+	\end{bmatrix}\\ &=
 	\begin{bmatrix}
 	1 & 0 & 0
 	\end{bmatrix}
@@ -111,19 +123,17 @@ Therefore $\Pr_{(n)}[i] = (\lambda \T^n)_i$ for all $n \in \mathbb{N}$. \qed
 		\frac{2}{6} & \frac{3}{6} & \frac{1}{6} \\
 		0           & 0			  & 1
 	\end{bmatrix}
-	^{10}
-	\]
-	\[
-	=	
+	^{10}\\
+	&=	
 	\begin{bmatrix}
 	\frac{1033729}{7558272} & \frac{3486025}{15116544} & \frac{3187687}{5038848}
 	\end{bmatrix}
 	\approx \begin{bmatrix}
 	.14 & .23 & .63
 	\end{bmatrix}
-	\]
+	\end{align*}
 \\
-Thus $\Pr_{(10)}(a) \approx .14$, $\Pr_{(10)}(b) \approx .23$, and $\Pr_{(10)}(c) \approx .63$.
+Thus $\Pr[X_{10} = a] \approx .14$, $\Pr[X_{10} = b] \approx .23$, and $\Pr[X_{10} = c] \approx .63$.
 	
 	\begin{thebibliography}{9}
 		\bibitem{interpretations}
