@@ -2,10 +2,13 @@
 
 \usepackage{enumerate}
 \usepackage{kbordermatrix}
+\usepackage{graphicx}
+\usepackage[font=small,labelfont=bf]{caption}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \usepackage{amsthm}
+\usepackage{algorithm2e}
 \usepackage{tikz}
 \usetikzlibrary{automata, positioning, arrows, calc}
 
@@ -83,57 +86,110 @@ We can represent $(X_n)_{n \geq 0}$ with the convenient notation $Markov(\lambda
 		c& 0 & 0 & 1}\]
 	At this point, it is very simple to determine the probability that the player is at any state in $i \in I$ after $n$ turns, for some $n \in \mathbb{N}$.
 \\
-\begin{thm}
-If $(X_n)_{n \geq 0}$ is $Markov(\lambda, \T)$, then for all $n \geq 0$, $i_0, \dots, i_n \in I$, \[\Pr[X_0 = i_0, X_1 = i_1, \dots, X_n = i_n] = \lambda_{i_0}\T_{i_0, i_1}\T_{i_1,i_2}, \dots, \T_{i_{n-1}, i_n}\]
-\end{thm}
-
-\begin{proof} Since $(X_n)_{n \geq 0}$ is $Markov(\lambda, \T)$, then
-\begin{align*}
-\Pr[&X_0 = i_0, X_1 = i_1, \dots, X_n = i_n]\\
- &= \Pr[X_0 = i_0]\Pr[X_1 = i_1 | X_0 = i_0]\dots\Pr[X_n = i_n | X_0 = i_0, \dots X_{n-1} = i_{n-1}]\\
- &= \lambda_{i_0}\T_{i_0, i_1}\T_{i_1,i_2}, \dots, \T_{i_{n-1}, i_n}
-\end{align*}
-\end{proof}
-It can be shown that the converse of this statement holds as well.
-
-\begin{thm} If $(X_n)_{n \geq 0}$ is $Markov(\lambda, \T)$, then for any $n \geq 0$, $i \in I$,
-\[\Pr[X_n = i] = (\lambda \T^{\,n})_i\]
-\end{thm}
-
-\begin{proof}
-The probability $\Pr[X_n = i]$ that we are on state $i$ after $n$ steps is equal to the sum of the probabilities of each permutation of states from steps $0$ through $n-1$. Therefore,
-\begin{align*}
-\Pr[X_n = i] &= \sum_{i_0 \in I} \dots \sum_{i_{n-1} \in I} \Pr[X_0 = i_0, \dots, X_{n-1} = i_{n-1}, X_n = i]\\
-&= \sum_{i_0 \in I} \dots \sum_{i_{n-1} \in I} \lambda_{i_0}\T_{i_0, i_1}\dots\T_{i_{n-1}, i} \tag{by Theorem 1}\\
-&= (\lambda \T^n)_i
-\end{align*}
-\end{proof}
-
-	Returning to our game, we can use this identity to determine the probability of being at each state after ten turns.
+	\begin{thm}
+	If $(X_n)_{n \geq 0}$ is $Markov(\lambda, \T)$, then for all $n \geq 0$, $i_0, \dots, i_n \in I$, \[\Pr[X_0 = i_0, X_1 = i_1, \dots, X_n = i_n] = \lambda_{i_0}\T_{i_0, i_1}\T_{i_1,i_2}, \dots, \T_{i_{n-1}, i_n}\]
+	\end{thm}
+	
+	\begin{proof} Since $(X_n)_{n \geq 0}$ is $Markov(\lambda, \T)$, then
 	\begin{align*}
-	\Big[\Pr[X_{10} = i] ~|~ i \in I\Big] &= 
-	\begin{bmatrix}
-	\Pr[X_{10} = a] & \Pr[X_{10} = b] & \Pr[X_{10} = c]
-	\end{bmatrix}\\ &=
-	\begin{bmatrix}
-	1 & 0 & 0
-	\end{bmatrix}
-	\begin{bmatrix}
-		\frac{2}{6} & \frac{4}{6} & 0           \\
-		\frac{2}{6} & \frac{3}{6} & \frac{1}{6} \\
-		0           & 0			  & 1
-	\end{bmatrix}
-	^{10}\\
-	&=	
-	\begin{bmatrix}
-	\frac{1033729}{7558272} & \frac{3486025}{15116544} & \frac{3187687}{5038848}
-	\end{bmatrix}
-	\approx \begin{bmatrix}
-	.14 & .23 & .63
-	\end{bmatrix}
+	\Pr[&X_0 = i_0, X_1 = i_1, \dots, X_n = i_n]\\
+	 &= \Pr[X_0 = i_0]\Pr[X_1 = i_1 | X_0 = i_0]\dots\Pr[X_n = i_n | X_0 = i_0, \dots X_{n-1} = i_{n-1}]\\
+	 &= \lambda_{i_0}\T_{i_0, i_1}\T_{i_1,i_2}, \dots, \T_{i_{n-1}, i_n}
 	\end{align*}
-\\
-Thus $\Pr[X_{10} = a] \approx .14$, $\Pr[X_{10} = b] \approx .23$, and $\Pr[X_{10} = c] \approx .63$.
+	\end{proof}
+	It can be shown that the converse of this statement holds as well.
+	
+	\begin{thm} If $(X_n)_{n \geq 0}$ is $Markov(\lambda, \T)$, then for any $n \geq 0$, $j \in I$,
+	\[\Pr[X_n = j] = (\lambda \T^{\,n})_j\]
+	\end{thm}
+	
+	\begin{proof}
+	The probability $\Pr[X_n = j]$ that we are on state $j$ after $n$ steps is equal to the sum of the probabilities of each permutation of states from steps $0$ through $n-1$. Therefore,
+	\begin{align*}
+	\Pr[X_n = j] &= \sum_{i_0 \in I} \dots \sum_{i_{n-1} \in I} \Pr[X_0 = i_0, \dots, X_{n-1} = i_{n-1}, X_n = j]\\
+	&= \sum_{i_0 \in I} \dots \sum_{i_{n-1} \in I} \lambda_{i_0}\T_{i_0, i_1}\dots\T_{i_{n-1}, j} \tag{by Theorem 1}\\
+	&= (\lambda \T^n)_j
+	\end{align*}
+	\end{proof}
+	
+		Returning to our game, we can use this identity to determine the probability of being at each state after ten turns.
+		\begin{align*}
+		\Big[\Pr[X_{10} = i] ~|~ i \in I\Big] &= 
+		\begin{bmatrix}
+		\Pr[X_{10} = a] & \Pr[X_{10} = b] & \Pr[X_{10} = c]
+		\end{bmatrix}\\ &=
+		\begin{bmatrix}
+		1 & 0 & 0
+		\end{bmatrix}
+		\begin{bmatrix}
+			\frac{2}{6} & \frac{4}{6} & 0           \\
+			\frac{2}{6} & \frac{3}{6} & \frac{1}{6} \\
+			0           & 0			  & 1
+		\end{bmatrix}
+		^{10}\\
+		&=	
+		\begin{bmatrix}
+		\frac{1033729}{7558272} & \frac{3486025}{15116544} & \frac{3187687}{5038848}
+		\end{bmatrix}
+		\approx \begin{bmatrix}
+		.14 & .23 & .63
+		\end{bmatrix}
+		\end{align*}
+	\\
+	Thus $\Pr[X_{10} = a] \approx .14$, $\Pr[X_{10} = b] \approx .23$, and $\Pr[X_{10} = c] \approx .63$.
+	
+	\subsection{The \textit{Outlaw} Game}
+	We analyze a variant of \textit{Outlaw}, a dice-based board game intended for 2 to 3 players, designed and published online by Phil Horswell. The \textit{Outlaw} game board consists of 12 outlaws $o_4, \dots, o_{9}, o_{19}, \dots, o_{24}$, each with a unique identifier in the range $[4, 9] \cup [19, 24]$. Players take turns rolling 4 dice; if the sum of the dice is equal to $k$ for $k \in [4, 9] \cup [19, 24]$, then the player captures outlaw $o_k$. Each outlaw comes with an associated cash bounty.
+	
+	\begin{center}
+	\includegraphics[scale=0.5]{outlaw_board}
+	\captionof{figure}{The \textit{Outlaw} game board.}
+	\end{center}
+	
+	In our ``Jailbreak'' variant of the game, if a player $P$ rolls an outlaw who has already been captured by a distinct player $P'$, then $P$ will steal that outlaw from away from $P'$. Only one player can have possession of any particular outlaw at one time. If a player $P$ has possession of $n$ distinct outlaws at once, then $P$ wins the game.
+	
+	\begin{defn}
+	We let $G = Jailbreak(p, n)$ be  a game of ``Jailbreak'' \textit{Outlaw} such that $G$ has $p$ players, and a player $P$ wins if $P$ has possession of $n$ distinct outlaws at once.
+	\end{defn}
+	
+	\section{Analysis of $Jailbreak(1, 3)$}
+
+	We begin by analyzing $G = Jailbreak(2, 3)$. Our analysis centers upon the length of the game; that is, how many turns are required in expectation until any player wins?
+
+	\subsection{Frequentist Analysis}
+	We present the following psuedocode to simulate a run of $G$. The actual code is available in the resources folder; C++ was used for its speed. Note that we define a maximum number of turns to ensure the procedure terminates.
+	\begin{algorithm}
+	\SetKwInOut{Input}{Input}
+	\Input{$p$ : number of players\\ $n$ : number of outlaws to win\\ $m$ : maximum number of turns}
+
+	\SetKwInOut{Output}{Output}
+	\Output{number of turns in simulated run of $Jailbreak(	p, n)$}
+	\ForEach{outlaw $o$}{
+		owner[$o$] $\gets$ None
+	}
+	\ForEach{player $P$}{
+		numOutlaws[$P$] $\gets$ 0
+	}
+	turn $\gets$ 0\\
+	\While{turn $< m$}{
+		turn $\gets$ turn + 1\\
+		\ForEach{player $P$}{
+			$k \gets$ randInt(1, 6) + randInt(1, 6) + randInt(1, 6) + randInt(1, 6)\\
+			\If{$4 \leq k \leq 9$ or $19 \leq k \leq 24$}{
+				numOutlaws[$P$] $\gets$ numOutlaws[$P$] + 1\\
+				prevOwner $\gets$ owner[$o_k$]\\
+				\If{{\upshape oldOwner} not \upshape None}{
+					numOutlaws[prevOwner] $\gets$ numOutlaws[prevOwner] - 1
+				}
+				owner[$o_k$] $\gets P$\\
+				\If{{\upshape numOutlaws[$P$]} $\geq n$}{
+					\Return{\upshape turn}
+				}
+			}
+		}
+	}
+	\Return{``turn limit reached''}
+	\end{algorithm}
 	
 	\begin{thebibliography}{9}
 		\bibitem{interpretations}
