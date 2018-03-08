@@ -149,7 +149,7 @@ We can represent $(X_n)_{n \geq 0}$ with the convenient notation $Markov(\lambda
 	In our ``Jailbreak'' variant of the game, if a player $P$ rolls an outlaw who has already been captured by a distinct player $P'$, then $P$ will steal that outlaw from away from $P'$. Only one player can have possession of any particular outlaw at one time. If a player $P$ has possession of $n$ distinct outlaws at once, then $P$ wins the game.
 	
 	\begin{defn}
-	We let $G = Jailbreak(p, n)$ be  a game of ``Jailbreak'' \textit{Outlaw} such that $G$ has $p$ players, and a player $P$ wins if $P$ has possession of $w$ distinct outlaws at once.
+	We let $G = Jailbreak(p, n)$ be a game of ``Jailbreak'' \textit{Outlaw} such that $G$ has $p$ players, and a player $P$ wins if $P$ has possession of $w$ distinct outlaws at once, for $p \geq 1$ and $1 \leq w \leq 12$.
 	\end{defn}
 	
 	\section{Analysis of $Jailbreak(p, w)$}
@@ -196,7 +196,7 @@ We can represent $(X_n)_{n \geq 0}$ with the convenient notation $Markov(\lambda
 	\subsubsection{Counting Dice Combinations}
 	To begin our analysis, we attempt to calculate the probability of capturing each outlaw or not capturing any outlaw in one turn. We assume that the probability of rolling any number on a die is $\frac{1}{6}$, and we also assume that dice rolls are independent.
 
-	We define $E_{o_k}$ to be the event that a player $P$ captures outlaw $o_k$ after rolling the dice, and we define $E_0$ to be the event that $P$ ``whiffs''; that is, $P$ does not capture any outlaw. 
+	We define $E_{o_k}$ to be the event that a player $P$ captures outlaw $o_k$ after rolling the dice, and we define $E_\varnothing$ to be the event that $P$ misses; that is, $P$ does not capture any outlaw. 
 
 	Let our sample space $\Omega$ be the set of all arrangements of four dice. Let $A_k$ be the set of arrangements of four dice such that their sum is $k$. Since $\Omega$ is a uniform sample space, we can see that for any $k \in [4, 9] \cup [19, 24]$, 
 \begin{align}\Pr[E_{o_k}] = \Pr[\text{sum of 4 dice rolls is $k$}] = \frac{|A_k|}{|\Omega|}\end{align}
@@ -233,13 +233,16 @@ We can represent $(X_n)_{n \geq 0}$ with the convenient notation $Markov(\lambda
 	\Pr[E_{o_7}] &= \Pr[E_{o_{21}}] = \tfrac{20}{1296}\\
 	\Pr[E_{o_8}] &= \Pr[E_{o_{20}}] = \tfrac{35}{1296}\\
 	\Pr[E_{o_9}] &= \Pr[E_{o_{19}}] = \tfrac{56}{1296}\\
-	\Pr[E_0] &= 1 - \Pr[E_{o_4} \cup \dots \cup E_{o_9} \cup E_{o_{19}} \cup \dots \cup E_{o_{24}}]\\
+	\Pr[E_\varnothing] &= 1 - \Pr[E_{o_4} \cup \dots \cup E_{o_9} \cup E_{o_{19}} \cup \dots \cup E_{o_{24}}]\\
 		&= 1 - \frac{2(1 + 4 + 10 + 20 + 35 + 56)}{1296}\\
 		&= 1 - \frac{252}{1296} = \frac{1044}{1296}
 	\end{align*}
 
 	% Todo: explain why we only keep track of player 1's state - is it an approximation or not?
+	\subsubsection{Discrete-Time Markov Chain Construction}
 We attempt to construct a Markov chain $(X_n)_{n \geq 0} = Markov(\lambda, \T)$ to describe $G$. We must first choose an appropriate state space $I$. Clearly, we cannot let a state simply represent the number of outlaws that $P_1$ controls, because different outlaws have different probabilities of capture, so it matters precisely which outlaws $P_1$ controls.  Therefore, we let $I = \{S \in \mathcal{P}(O) ~\big|~ |S| \leq w\}$; that is, each state represents the subset of distinct outlaws that $P_1$ controls. We don't need to consider subsets of more than $w$ outlaws, because once $P_1$ collects $w$ outlaws then the game is over.
+
+	However, note that since the game ends when $P_1$ collects \textit{any} subset of $w$ outlaws, then it doesn't matter which $w$ outlaws $P_1$ controls. Therefore, for all states $S$ such that $|S| = w$, we can combine them into one winning state $F$. Thus we can instead let $I = \{S \in \mathcal{P}(O) ~\big|~ |S| < w\} \cup \{F\}$.
 
 	% Future note - we can simplify all of the n-subsets into one state!
 	% To consider - use Myhill-Nerode to show that # of states is minimized? That would be dope
@@ -247,14 +250,35 @@ We attempt to construct a Markov chain $(X_n)_{n \geq 0} = Markov(\lambda, \T)$ 
 
 	Finally, we must define our transition matrix $\T$. But what constitutes a ``transition'' of our Markov chain? Even though our state space only contains the possible subsets of outlaws that $P_1$ controls, we cannot consider only $P_1$'s dice rolls as our transitions. In ``Jailbreak'' \textit{Outlaw}, the other players' dice rolls can also affect the $P_1$'s current subset of outlaws, because other players can steal away an outlaw from $P_1$. Therefore every player's dice roll must be a transition.
 
-	However, note that our transition matrix is different depending on whether it is currently $P_1$'s turn or another player's turn. For now, we consider these cases separately.
+	However, note that our transition matrix is different depending on whether it is currently $P_1$'s turn or another player's turn. For now, we consider these cases separately. We will define two transition matrices, $\T$ and $\T'$, to describe the probabilities of each transition on $P_1$'s turn and on another player's turn, respectively.\\
+
 
 	In the case that it is $P_1$'s turn, and the current state is $S \in I$, then we can determine the probability of transitioning to any other state:
 
-	We can never lose control of an outlaw on our turn, so the probability of transitioning to any state containing fewer outlaws is 0.
+	If $S$ is the winning state, that is, if $S = F$, then the game is over, so we transition back to $F$ with probability 1. Otherwise, if $S \neq F$:
 
-	We transition back to $S$ if we roll any outlaw we already control, or if we don't capture any outlaw; therefore the probability of transitioning back to $S$ is the probability of rolling any outlaw $o \in S$ plus the probability that we 
+	We can never lose control of an outlaw on our turn, so the probability of transitioning to any state containing fewer outlaws is 0. We also cannot capture more than one outlaw per turn, so the probability of transitioning to any state containing more than one new outlaw is 0.
 
+	We transition back to $S$ if we roll any outlaw we already control, or if we don't capture any outlaw; therefore the probability of transitioning back to $S$ is the probability of capturing any outlaw $o \in S$ or rolling no outlaw.
+
+	We can only transition to a new state by capturing a new outlaw. If we only need to capture one more outlaw to win, then the probability of transitioning to $F$ is the probability that we capture any new outlaw. Otherwise, for any outlaw $o \not \in S$, the probability of transitioning to any new state $S' = S \cup \{o\}$ is the probability of capturing $o$.
+
+	Therefore, for any states $S, S' \in I$, we define \[\T_{S, S'} =
+	\begin{cases}
+	0 &\text{ if $|S'| < |S|$ or $|S'| > |S| + 1$}\\
+	0 &\text{ if $S = F \neq S'$}\\
+	1 &\text{ if $S = F = S'$}\\
+	\sum\limits_{o \not \in S} \Pr[E_o] &\text{ if $|S| = w - 1$ and $S' = F$}\\
+	\Pr[E_\varnothing] + \sum\limits_{o \in S} \Pr[E_o] &\text{ if $S' = S \neq F$}\\
+	\Pr[E_o] &\text{ if $S' = S \cup \{o\}$}
+	\end{cases}\]
+
+	In the case that it is not $P_1$'s turn, and the current state is $S \in I$, then we can determine the probability of transitioning to any other state:
+
+	If $S$ is the winning state, that is, if $S = F$, then the game is over, so we transition back to $F$ with probability 1. Otherwise, if $S \neq F$:
+
+	We can never gain control of an outlaw on another player's turn, so the probability of transitioning to any state containing more outlaws is 0. Also, another player cannot steal away more than one outlaw per turn, so the probability of transitioning to any state containing less than one fewer outlaws is 0.
+	
 	
 	
 	\begin{thebibliography}{9}
