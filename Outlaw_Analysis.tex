@@ -192,11 +192,28 @@ We can represent $(X_n)_{n \geq 0}$ with the convenient notation $Markov(\lambda
 	\end{algorithm}
 
 	\subsection{Bayesian Analysis}
-	% Todo: explain why we only keep track of player 1's state
+	To begin our analysis, we attempt to calculate the probability of capturing each outlaw or not capturing any outlaw in one turn. We assume that the probability of rolling any number on a die is $\frac{1}{6}$, and we also assume that dice rolls are independent.
+
+	We define $E_{o_k}$ to be the event that a player $P$ captures outlaw $o_k$ after rolling the dice, and we define $E_0$ to be the event that $P$ ``whiffs''; that is, $P$ does not capture any outlaw.
+
+	% Todo: explain why we only keep track of player 1's state - is it an approximation or not?
 We attempt to construct a Markov chain $(X_n)_{n \geq 0} = Markov(\lambda, \T)$ to describe $G$. We must first choose an appropriate state space $I$. Clearly, we cannot let a state simply represent the number of outlaws that $P_1$ controls, because different outlaws have different probabilities of capture, so it matters precisely which outlaws $P_1$ controls.  Therefore, we let $I = \{S \in \mathcal{P}(O) ~\big|~ |S| \leq w\}$; that is, each state represents the subset of distinct outlaws that $P_1$ controls. We don't need to consider subsets of more than $w$ outlaws, because once $P_1$ collects $w$ outlaws then the game is over.
 
 	% Future note - we can simplify all of the n-subsets into one state!
+	% To consider - use Myhill-Nerode to show that # of states is minimized? That would be dope
 	Now that we have chosen our state space, we must choose our initial distribution $\lambda$. At the start of the game, each player controls no outlaws; therefore, \[\lambda_\emptyset = \Pr[X_0 = \emptyset] = 1, \text{ and }\lambda_S = \Pr[X_0 = S] = 0,\] for all $S \in I$ s.t. $S \neq \emptyset$.
+
+	Finally, we must define our transition matrix $\T$. But what constitutes a ``transition'' of our Markov chain? Even though our state space only contains the possible subsets of outlaws that $P_1$ controls, we cannot consider only $P_1$'s dice rolls as our transitions. In ``Jailbreak'' \textit{Outlaw}, the other players' dice rolls can also affect the $P_1$'s current subset of outlaws, because other players can steal away an outlaw from $P_1$. Therefore every player's dice roll must be a transition.
+
+	However, note that our transition matrix is different depending on whether it is currently $P_1$'s turn or another player's turn. For now, we consider these cases separately.
+
+	In the case that it is $P_1$'s turn, and the current state is $S \in I$, then we can determine the probability of transitioning to any other state:
+
+	We can never lose control of an outlaw on our turn, so the probability of transitioning to any state containing fewer outlaws is 0.
+
+	We transition back to $S$ if we roll any outlaw we already control, or if we don't capture any outlaw; therefore the probability of transitioning back to $S$ is the probability of rolling any outlaw $o \in S$ plus the probability that we 
+
+	
 	
 	\begin{thebibliography}{9}
 		\bibitem{interpretations}
