@@ -139,7 +139,7 @@ We can represent $(X_n)_{n \geq 0}$ with the convenient notation $Markov(\lambda
 	Thus $\Pr[X_{10} = a] \approx .14$, $\Pr[X_{10} = b] \approx .23$, and $\Pr[X_{10} = c] \approx .63$.
 	
 	\subsection{The \textit{Outlaw} Game}
-	We analyze a variant of \textit{Outlaw}, a dice-based board game intended for 2 to 3 players, designed and published online by Phil Horswell. The \textit{Outlaw} game board consists of 12 outlaws $o_4, \dots, o_{9}, o_{19}, \dots, o_{24}$, each with a unique identifier in the range $[4, 9] \cup [19, 24]$. Players take turns rolling 4 dice; if the sum of the dice is equal to $k$ for $k \in [4, 9] \cup [19, 24]$, then the player captures outlaw $o_k$. Each outlaw comes with an associated cash bounty.
+	We analyze a variant of \textit{Outlaw}, a dice-based board game intended for 2 to 3 players, designed and published online by Phil Horswell. The \textit{Outlaw} game board features the set of 12 outlaws $O = \{o_4, \dots, o_{9}, o_{19}, \dots, o_{24}\}$, each with a unique identifier in the range $[4, 9] \cup [19, 24]$. Players take turns rolling 4 dice; if the sum of the dice is equal to $k$ for $k \in [4, 9] \cup [19, 24]$, then the player captures outlaw $o_k$. Each outlaw comes with an associated cash bounty.
 	
 	\begin{center}
 	\includegraphics[scale=0.5]{outlaw_board}
@@ -149,21 +149,21 @@ We can represent $(X_n)_{n \geq 0}$ with the convenient notation $Markov(\lambda
 	In our ``Jailbreak'' variant of the game, if a player $P$ rolls an outlaw who has already been captured by a distinct player $P'$, then $P$ will steal that outlaw from away from $P'$. Only one player can have possession of any particular outlaw at one time. If a player $P$ has possession of $n$ distinct outlaws at once, then $P$ wins the game.
 	
 	\begin{defn}
-	We let $G = Jailbreak(p, n)$ be  a game of ``Jailbreak'' \textit{Outlaw} such that $G$ has $p$ players, and a player $P$ wins if $P$ has possession of $n$ distinct outlaws at once.
+	We let $G = Jailbreak(p, n)$ be  a game of ``Jailbreak'' \textit{Outlaw} such that $G$ has $p$ players, and a player $P$ wins if $P$ has possession of $w$ distinct outlaws at once.
 	\end{defn}
 	
-	\section{Analysis of $Jailbreak(1, 3)$}
+	\section{Analysis of $Jailbreak(p, w)$}
 
-	We begin by analyzing $G = Jailbreak(2, 3)$. Our analysis centers upon the length of the game; that is, how many turns are required in expectation until any player wins?
+	We begin by analyzing $G = Jailbreak(p, w)$. Our analysis centers upon the length of the game; that is, how many turns are required in expectation until any player wins?
 
 	\subsection{Frequentist Analysis}
-	We present the following psuedocode to simulate a run of $G$. The actual code is available in the resources folder; C++ was used for its speed. Note that we define a maximum number of turns to ensure the procedure terminates.
+	We present the following psuedocode to simulate a run of $G$. The actual code is available in the resources folder; C++ was used for its speed. Note that we define a maximum number of turns to ensure that the procedure terminates.
 	\begin{algorithm}
 	\SetKwInOut{Input}{Input}
-	\Input{$p$ : number of players\\ $n$ : number of outlaws to win\\ $m$ : maximum number of turns}
+	\Input{$p$ : number of players\\ $w$ : number of outlaws to win\\ $m$ : maximum number of turns}
 
 	\SetKwInOut{Output}{Output}
-	\Output{number of turns in simulated run of $Jailbreak(	p, n)$}
+	\Output{number of turns in simulated run of $Jailbreak(p, w)$}
 	\ForEach{outlaw $o$}{
 		owner[$o$] $\gets$ None
 	}
@@ -182,7 +182,7 @@ We can represent $(X_n)_{n \geq 0}$ with the convenient notation $Markov(\lambda
 					numOutlaws[prevOwner] $\gets$ numOutlaws[prevOwner] - 1
 				}
 				owner[$o_k$] $\gets P$\\
-				\If{{\upshape numOutlaws[$P$]} $\geq n$}{
+				\If{{\upshape numOutlaws[$P$]} $\geq w$}{
 					\Return{\upshape turn}
 				}
 			}
@@ -190,6 +190,13 @@ We can represent $(X_n)_{n \geq 0}$ with the convenient notation $Markov(\lambda
 	}
 	\Return{``turn limit reached''}
 	\end{algorithm}
+
+	\subsection{Bayesian Analysis}
+	% Todo: explain why we only keep track of player 1's state
+We attempt to construct a Markov chain $(X_n)_{n \geq 0} = Markov(\lambda, \T)$ to describe $G$. We must first choose an appropriate state space $I$. Clearly, we cannot let a state simply represent the number of outlaws that $P_1$ controls, because different outlaws have different probabilities of capture, so it matters precisely which outlaws $P_1$ controls.  Therefore, we let $I = \{S \in \mathcal{P}(O) ~\big|~ |S| \leq w\}$; that is, each state represents the subset of distinct outlaws that $P_1$ controls. We don't need to consider subsets of more than $w$ outlaws, because once $P_1$ collects $w$ outlaws then the game is over.
+
+	% Future note - we can simplify all of the n-subsets into one state!
+	Now that we have chosen our state space, we must choose our initial distribution $\lambda$. At the start of the game, each player controls no outlaws; therefore, \[\lambda_\emptyset = \Pr[X_0 = \emptyset] = 1, \text{ and }\lambda_S = \Pr[X_0 = S] = 0,\] for all $S \in I$ s.t. $S \neq \emptyset$.
 	
 	\begin{thebibliography}{9}
 		\bibitem{interpretations}
