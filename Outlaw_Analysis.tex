@@ -192,9 +192,51 @@ We can represent $(X_n)_{n \geq 0}$ with the convenient notation $Markov(\lambda
 	\end{algorithm}
 
 	\subsection{Bayesian Analysis}
+
+	\subsubsection{Counting Dice Combinations}
 	To begin our analysis, we attempt to calculate the probability of capturing each outlaw or not capturing any outlaw in one turn. We assume that the probability of rolling any number on a die is $\frac{1}{6}$, and we also assume that dice rolls are independent.
 
-	We define $E_{o_k}$ to be the event that a player $P$ captures outlaw $o_k$ after rolling the dice, and we define $E_0$ to be the event that $P$ ``whiffs''; that is, $P$ does not capture any outlaw.
+	We define $E_{o_k}$ to be the event that a player $P$ captures outlaw $o_k$ after rolling the dice, and we define $E_0$ to be the event that $P$ ``whiffs''; that is, $P$ does not capture any outlaw. 
+
+	Let our sample space $\Omega$ be the set of all arrangements of four dice. Let $A_k$ be the set of arrangements of four dice such that their sum is $k$. Since $\Omega$ is a uniform sample space, we can see that for any $k \in [4, 9] \cup [19, 24]$, 
+\begin{align}\Pr[E_{o_k}] = \Pr[\text{sum of 4 dice rolls is $k$}] = \frac{|A_k|}{|\Omega|}\end{align}
+
+	We can see that each die has 6 possible states, so $|\Omega| = 6^4 = 1296$. To count $|A_k|$, we can consider the problem of distributing $k$ indistinguishable units to the 4 dice. Since each die must have a positive value, we must distribute 1 unit to each of the 4 dice, leaving us with $k-4$ units in total to distribute. For $4 \leq k \leq 9 \implies 0 \leq k - 4 \leq 5$, we cannot distribute more than 5 additional units to one die, which would leave it with an value greater than 6. Therefore, by the stars and bars technique, $|A_k| = \binom{k - 4 + 4 - 1}{4 - 1} = \binom{k - 1}{3}$ for $4 \leq k \leq 9$.
+
+	Therefore, we have
+	\begin{align*}
+		&|A_4| = \tbinom{3}{3} = 1\\
+		&|A_5| = \tbinom{4}{3} = 4\\
+		&|A_6| = \tbinom{5}{3} = 10\\
+		&|A_7| = \tbinom{6}{3} = 20\\
+		&|A_8| = \tbinom{7}{3} = 35\\
+		&|A_9| = \tbinom{8}{3} = 56
+	\end{align*}
+
+	Next, we notice that the sum of 4 dice is at most $6 \times 4 = 24$. Then we can also count $|A_k|$ by considering the problem of removing $24 - k$ industinguishable units in total from the 4 dice. For $19 \leq k \leq 24 \implies 0 \leq 24 - k \leq 5$, we cannot remove more than 5 units from one die, which would leave it with a value less than 1. Therefore, we can imagine that we are distributing $24 - k$ indistinguishable spots of white paint, each of which can remove one dot from a die, to the 4 dice. Then by the stars and bars technique again, $|A_k| = \binom{24 - k + 4 - 1}{4 - 1} = \binom{27 - k}{3}$ for $19 \leq k \leq 24$.
+
+	Therefore, we have
+	\begin{align*}
+		&|A_{19}| = \tbinom{27 - 19}{3} = \tbinom{8}{3} = 56\\
+		&|A_{20}| = \tbinom{27 - 20}{3} = \tbinom{7}{3} = 35\\
+		&|A_{21}| = \tbinom{27 - 21}{3} = \tbinom{6}{3} = 20\\
+		&|A_{22}| = \tbinom{27 - 22}{3} = \tbinom{5}{3} = 10\\
+		&|A_{23}| = \tbinom{27 - 23}{3} = \tbinom{4}{3} = 4\\
+		&|A_{24}| = \tbinom{27 - 24}{3} = \tbinom{3}{3} = 1
+	\end{align*}
+
+	Finally, by Equation (1) from above,
+	\begin{align*}
+	\Pr[E_{o_4}] &= \Pr[E_{o_{24}}] = \tfrac{1}{1296}\\
+	\Pr[E_{o_5}] &= \Pr[E_{o_{23}}] = \tfrac{4}{1296}\\
+	\Pr[E_{o_6}] &= \Pr[E_{o_{22}}] = \tfrac{10}{1296}\\
+	\Pr[E_{o_7}] &= \Pr[E_{o_{21}}] = \tfrac{20}{1296}\\
+	\Pr[E_{o_8}] &= \Pr[E_{o_{20}}] = \tfrac{35}{1296}\\
+	\Pr[E_{o_9}] &= \Pr[E_{o_{19}}] = \tfrac{56}{1296}\\
+	\Pr[E_0] &= 1 - \Pr[E_{o_4} \cup \dots \cup E_{o_9} \cup E_{o_{19}} \cup \dots \cup E_{o_{24}}]\\
+		&= 1 - \frac{2(1 + 4 + 10 + 20 + 35 + 56)}{1296}\\
+		&= 1 - \frac{252}{1296} = \frac{1044}{1296}
+	\end{align*}
 
 	% Todo: explain why we only keep track of player 1's state - is it an approximation or not?
 We attempt to construct a Markov chain $(X_n)_{n \geq 0} = Markov(\lambda, \T)$ to describe $G$. We must first choose an appropriate state space $I$. Clearly, we cannot let a state simply represent the number of outlaws that $P_1$ controls, because different outlaws have different probabilities of capture, so it matters precisely which outlaws $P_1$ controls.  Therefore, we let $I = \{S \in \mathcal{P}(O) ~\big|~ |S| \leq w\}$; that is, each state represents the subset of distinct outlaws that $P_1$ controls. We don't need to consider subsets of more than $w$ outlaws, because once $P_1$ collects $w$ outlaws then the game is over.
