@@ -17,7 +17,7 @@
 \date{February 21, 2018}
 
 \renewcommand{\qed}{$\hfill \blacksquare$}
-\newcommand{\T}{\textbf{\textit{T}}}
+\newcommand{\T}{\textbf{{T}}}
 \newcommand{\x}{\vec{x}}
 \renewcommand{\arraystretch}{1.3}
 
@@ -250,20 +250,20 @@ We attempt to construct a Markov chain $(X_n)_{n \geq 0} = Markov(\lambda, \T)$ 
 
 	Finally, we must define our transition matrix $\T$. But what constitutes a ``transition'' of our Markov chain? Even though our state space only contains the possible subsets of outlaws that $P_1$ controls, we cannot consider only $P_1$'s dice rolls as our transitions. In ``Jailbreak'' \textit{Outlaw}, the other players' dice rolls can also affect the $P_1$'s current subset of outlaws, because other players can steal away an outlaw from $P_1$. Therefore every player's dice roll must be a transition.
 
-	However, note that our transition matrix is different depending on whether it is currently $P_1$'s turn or another player's turn. For now, we consider these cases separately. We will define two transition matrices, $\T$ and $\T'$, to describe the probabilities of each transition on $P_1$'s turn and on another player's turn, respectively.\\
+	However, note that our transition matrix is different depending on whether it is currently $P_1$'s turn or another player's turn. For now, we consider these cases separately. We will define two transition matrices, $\T'$ and $\T^*$, to describe the probabilities of each transition on $P_1$'s turn and on another player's turn, respectively.\\
 
 
 	In the case that it is $P_1$'s turn, and the current state is $S \in I$, then we can determine the probability of transitioning to any other state:
 
 	If $S$ is the winning state, that is, if $S = F$, then the game is over, so we transition back to $F$ with probability 1. Otherwise, if $S \neq F$:
 
-	We can never lose control of an outlaw on our turn, so the probability of transitioning to any state containing fewer outlaws is 0. We also cannot capture more than one outlaw per turn, so the probability of transitioning to any state containing more than one new outlaw is 0.
+	We can never lose control of an outlaw on our turn, so the probability of transitioning to any state containing fewer outlaws is 0. We also cannot capture more than one outlaw per turn, so the probability of transitioning to any state containing more than one additional outlaw is 0.
 
-	We transition back to $S$ if we roll any outlaw we already control, or if we don't capture any outlaw; therefore the probability of transitioning back to $S$ is the probability of capturing any outlaw $o \in S$ or rolling no outlaw.
+	We transition back to $S$ if we roll any outlaw we already control, or if we don't capture any outlaw; therefore the probability of transitioning back to $S$ is the probability of capturing any outlaw $o \in S$ or capturing no outlaw.
 
-	We can only transition to a new state by capturing a new outlaw. If we only need to capture one more outlaw to win, then the probability of transitioning to $F$ is the probability that we capture any new outlaw. Otherwise, for any outlaw $o \not \in S$, the probability of transitioning to any new state $S' = S \cup \{o\}$ is the probability of capturing $o$.
+	We can only transition to a new state by capturing a new outlaw. Then if we only need to capture one more outlaw to win, then the probability of transitioning to $F$ is the probability that we capture any new outlaw. Otherwise, for any outlaw $o \not \in S$, the probability of transitioning to any new state $S' = S \cup \{o\}$ is the probability of capturing $o$.
 
-	Therefore, for any states $S, S' \in I$, we define \[\T_{S, S'} =
+	Therefore, for any states $S, S' \in I$, we define \[\T'_{S, S'} =
 	\begin{cases}
 	0 &\text{ if $|S'| < |S|$ or $|S'| > |S| + 1$}\\
 	0 &\text{ if $S = F \neq S'$}\\
@@ -273,15 +273,29 @@ We attempt to construct a Markov chain $(X_n)_{n \geq 0} = Markov(\lambda, \T)$ 
 	\Pr[E_o] &\text{ if $S' = S \cup \{o\}$}
 	\end{cases}\]
 
-	In the case that it is not $P_1$'s turn, and the current state is $S \in I$, then we can determine the probability of transitioning to any other state:
+	In the case that it is $P$'s turn for some player $P \neq P_1$, and the current state is $S \in I$, then we can determine the probability of transitioning to any other state:
 
 	If $S$ is the winning state, that is, if $S = F$, then the game is over, so we transition back to $F$ with probability 1. Otherwise, if $S \neq F$:
 
-	We can never gain control of an outlaw on another player's turn, so the probability of transitioning to any state containing more outlaws is 0. Also, another player cannot steal away more than one outlaw per turn, so the probability of transitioning to any state containing less than one fewer outlaws is 0.
+	We can never gain control of an outlaw on another player's turn, so the probability of transitioning to any state containing more outlaws is 0. Also, $P$ cannot steal away more than one outlaw per turn, so the probability of transitioning to any state with more than one outlaw removed is 0.
+
+	We transition back to $S$ if $P$ captures any outlaw we don't control, or if $P$ doesn't capture any outlaw; therefore the probability of transitioning back to $S$ is the probability of capturing any outlaw $o \not \in S$ or capturing no outlaw.
+
+	We can only transition to a new state if $P$ captures an outlaw that we control. Then for any outlaw $o \in S$, the probability of transitioning to any new state $S' = S \setminus \{o\}$ is the probability of capturing $o$.
 	
-	
+	Therefore, for any states $S, S' \in I$, we define \[\T^*_{S, S'} =
+	\begin{cases}
+	0 &\text{ if $|S'| > |S|$ or $|S'| < |S| - 1$}\\
+	0 &\text{ if $S = F \neq S'$}\\
+	1 &\text{ if $S = F = S'$}\\
+	\Pr[E_\varnothing] + \sum\limits_{o \not \in S} \Pr[E_o] &\text{ if $S' = S \neq F$}\\
+	\Pr[E_o] &\text{ if $S' = S \setminus \{o\}$}
+	\end{cases}\]
+
+	There
 	
 	\begin{thebibliography}{9}
+		% To do: update - Norris for Markov Chains, Sipser for Myhill-Nerode
 		\bibitem{interpretations}
 		H\'{a}jek, Alan, ``Interpretations of Probability'', The Stanford Encyclopedia of Philosophy (Winter 2012 Edition), Edward N. Zalta (ed.), \texttt{https://plato.stanford.edu/archives/win2012/entries/probability-interpret/}.
 	\end{thebibliography}
